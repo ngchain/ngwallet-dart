@@ -54,7 +54,7 @@ class getBalanceByNumCMD extends Command {
 
   @override
   void run() {
-    var accountNum = argResults['num'];
+    var accountNum = int.parse(argResults['num']);
 
     getBalanceByNum(accountNum);
   }
@@ -70,7 +70,7 @@ class newTransactionTxCMD extends Command {
   newTransactionTxCMD() {
     // [argParser] is automatically created by the parent class.
     argParser.addOption('privateKey');
-    argParser.addMultiOption('convener');
+    argParser.addOption('convener');
     argParser.addMultiOption('participants');
     argParser.addMultiOption('values');
     argParser.addOption('fee');
@@ -80,7 +80,7 @@ class newTransactionTxCMD extends Command {
   @override
   void run() {
     var privateKey = checkEmpty(argResults['privateKey'], 'privateKey');
-    var convener = checkEmpty(argResults['convener'], 'convener');
+    var convener = int.parse(checkEmpty(argResults['convener'], 'convener'));
     var participants = LStr2LInt(argResults['participants']);
     var values = LStr2LNum(argResults['values']);
     var fee = num.parse(checkEmpty(argResults['fee'], 'fee'));
@@ -151,7 +151,7 @@ class newAssignTxCMD extends Command {
 
   newAssignTxCMD() {
     argParser.addOption('privateKey');
-    argParser.addMultiOption('convener');
+    argParser.addOption('convener');
     argParser.addOption('fee');
     argParser.addOption('extra');
   }
@@ -159,7 +159,7 @@ class newAssignTxCMD extends Command {
   @override
   void run() {
     var privateKey = checkEmpty(argResults['privateKey'], 'privateKey');
-    var convener = checkEmpty(argResults['convener'], 'convener');
+    var convener = int.parse(checkEmpty(argResults['convener'], 'convener'));
     var fee = num.parse(checkEmpty(argResults['fee'], 'fee'));
     var extra = argResults['extra'];
 
@@ -176,7 +176,7 @@ class newAppendTxCMD extends Command {
 
   newAppendTxCMD() {
     argParser.addOption('privateKey');
-    argParser.addMultiOption('convener');
+    argParser.addOption('convener');
     argParser.addOption('fee');
     argParser.addOption('extra');
   }
@@ -184,7 +184,7 @@ class newAppendTxCMD extends Command {
   @override
   void run() {
     var privateKey = checkEmpty(argResults['privateKey'], 'privateKey');
-    var convener = checkEmpty(argResults['convener'], 'convener');
+    var convener = int.parse(checkEmpty(argResults['convener'], 'convener'));
     var fee = num.parse(checkEmpty(argResults['fee'], 'fee'));
     var extra = argResults['extra'];
 

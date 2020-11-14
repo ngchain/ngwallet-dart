@@ -1,6 +1,8 @@
 # ngwallet-dart
 
-a simple cli wallet to NGIN
+`ngwallet (dart version)` is an ONLINE simple cli wallet to NGIN network.
+
+So before running ngwallet, it is required to host or find a living rpc server on ngcore daemon.
 
 ## Usage
 

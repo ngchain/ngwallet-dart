@@ -1,6 +1,4 @@
-import 'package:jsonrpc2/client_base.dart';
 import 'package:jsonrpc2/jsonrpc_io_client.dart';
-import 'package:jsonrpc2/rpc_exceptions.dart';
 
 class NgRPCClient {
   ServerProxy proxy;
@@ -35,28 +33,38 @@ class NgRPCClient {
     return res;
   }
 
-  Future<Map> getAccountByNum(num n) async {
-    var res = await proxy.call('getAccountByNum', {'num': n});
+  Future<Map> getAccountByNum(num accountNum) async {
+    var res = await proxy.call('getAccountByNum', {'num': accountNum});
     if (res is Exception) {
       throw res;
     }
     return res;
   }
 
-  Future<List> getAccountsByAddress(String addr) async {
-    var res = await proxy.call('getAccountsByAddress', {'address': addr});
+  Future<List> getAccountByAddr(String addr) async {
+    var res = await proxy.call('getAccountByAddress', {'address': addr});
     if (res is Exception) {
       throw res;
     }
     return res;
   }
 
-  Future<String> getBalanceByNum(int n) async {
+  Future<BigInt> getBalanceByNum(int n) async {
     var res = await proxy.call('getBalanceByNum', {'num': n});
     if (res is Exception) {
       throw res;
     }
-    return res;
+
+    return BigInt.parse(res, radix: 10);
+  }
+
+  Future<BigInt> getBalanceByAddr(String addr) async {
+    var res = await proxy.call('getBalanceByAddress', {'address': addr});
+    if (res is Exception) {
+      throw res;
+    }
+
+    return BigInt.parse(res, radix: 10);
   }
 
   Future<Map> getLatestBlock() async {

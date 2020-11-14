@@ -1,0 +1,22 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "checkTx",
+            "program": "${workspaceFolder}/bin/ngwallet.dart",
+            "request": "launch",
+            "type": "dart",
+            "args": ["checkTx",  "--hash", "7b31a0319dc3261a328c390ddd5c9fc8805c24899a6199b6308da3ba18c14ac1"]
+        },
+        {
+            "name": "newTransactionTx",
+            "program": "${workspaceFolder}/bin/ngwallet.dart",
+            "request": "launch",
+            "type": "dart",
+            "args": ["newTransactionTx", "--privateKey", "AYBxTPyyPvAXxKGBH2mZSyKDwCFVwM1zD4JYJZaVF4SK", "--convener",  "65535", "--participants", "0",  "--values", "10", "--fee", "1", "--extra", "deadbeef"]
+        }
+    ]
+}

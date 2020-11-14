@@ -7,14 +7,14 @@ String getBS58AddressFromPrivateKey(String bs58PrivateKeys) {
   var rawPrivateKey = Base58Decode(bs58PrivateKeys);
   var hexPrivateKey = HEX.encode(rawPrivateKey);
 
-  var privateKey = hexToPrivateKey(hexPrivateKey);
-  var publicKey = getPublic(privateKey);
+  var privateKey = PrivateKey.fromHex(hexPrivateKey);
+  var publicKey = privateKey.publicKey;
   var k = SHA3(256, SHA3_PADDING, 256);
 
   k.update(rawPrivateKey);
   var hash = k.digest();
   var addr = hash.sublist(0, 2);
-  var hexPub = publicKeyToCompressHex(publicKey); // TODO: support schnorr
+  var hexPub = publicKey.toCompressedHex(); // TODO: support schnorr
 
   addr.addAll(HEX.decode(hexPub));
   return Base58Encode(addr);
@@ -27,13 +27,4 @@ List<num> LStr2LNum(List<String> lstr) {
   });
 
   return lnum;
-}
-
-List<int> LStr2LInt(List<String> lstr) {
-  var lint = <int>[];
-  lstr.forEach((str) {
-    lint.add(int.parse(str));
-  });
-
-  return lint;
 }

@@ -1,0 +1,112 @@
+name: CI
+on:
+  push:
+    branches: [master]
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build:
+    name: Build ngwallet
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+        - build: x86_64-linux
+          os: ubuntu-latest
+        - build: x86_64-macos
+          os: macos-latest
+        - build: x86_64-windows
+          os: windows-latest
+          target: x86_64-pc-windows-gnu
+        - build: aarch64-linux
+          os: ubuntu-latest
+          target: aarch64-unknown-linux-gnu
+          gcc_package: gcc-aarch64-linux-gnu
+          gcc: aarch64-linux-gnu-gcc
+          qemu: qemu-aarch64 -L /usr/aarch64-linux-gnu
+          qemu_target: aarch64-linux-user
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        architecture: x64
+      if: matric.build != aarch64-linux
+    - uses: actions/checkout@v2
+      with:
+        architecture: arm64
+      if: matric.build == aarch64-linux
+    - uses: cedx/setup-dart@v2
+    - name: get ready
+      run: pub get
+    - name: run tests
+      run: pub run test
+    - run: mkdir dist
+    - run: dart2native ./bin/ngwallet.dart -o ./dist/ngwallet.exe
+      if: matrix.os == 'windows-latest'
+    - run: dart2native ./bin/ngwallet.dart -o ./dist/ngwallet
+      if: matrix.os != 'windows-latest' && matric.build != aarch64-linux
+    - uses: actions/upload-artifact@v1
+      with:
+        name: ngwallet-${{ matrix.build }}
+        path: dist
+
+  publish:
+    name: Publish
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Download x86_64 macOS binaries
+      uses: actions/download-artifact@v1
+      with:
+        name: ngwallet-x86_64-macos
+    - name: Download x86_64 Linux binaries
+      uses: actions/download-artifact@v1
+      with:
+        name: ngwallet-x86_64-linux
+    - name: Download AArch64 Linux binaries
+      uses: actions/download-artifact@v1
+      with:
+        name: ngwallet-aarch64-linux
+    - name: Download x86_64 Windows MinGW binaries
+      uses: actions/download-artifact@v1
+      with:
+        name: ngwallet-x86_64-windows
+
+    # Assemble all the build artifacts into tarballs and zip archives.
+    - name: Assemble tarballs
+      run: |
+        bash ./.github/tools/build-tarballs.sh x86_64-linux
+        bash ./.github/tools/build-tarballs.sh x86_64-windows zip
+        bash ./.github/tools/build-tarballs.sh x86_64-macos
+        bash ./.github/tools/build-tarballs.sh aarch64-linux
+    # Upload all assembled tarballs as an artifact of the github action run, so
+    # that way even PRs can inspect the output.
+    - uses: actions/upload-artifact@v1
+      with:
+        name: tarballs
+        path: dist
+
+    - name: Calculate tag name
+      run: |
+        name=dev
+        if [[ $GITHUB_REF == refs/tags/v* ]]; then
+          name=${GITHUB_REF:10}
+        fi
+        echo ::set-output name=val::$name
+        echo ::set-env name=TAG::$name
+      id: tagname
+
+    # ... and if this was an actual push (tag or `master`) then we publish a
+    # new release. This'll automatically publish a tag release or update `dev`
+    # with this `sha`
+    - name: Publish Release
+      uses: ./.github/actions/github-release
+      if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v'))
+      with:
+        files: "dist/*"
+        name: ${{ steps.tagname.outputs.val }}
+        token: ${{ secrets.GITHUB_TOKEN }}
+

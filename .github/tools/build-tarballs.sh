@@ -21,5 +21,5 @@ mktarball() {
 bin_pkgname=ngcore-$platform
 mkdir tmp/$bin_pkgname
 
-mv ngcore-$platform/* tmp/$bin_pkgname
+mv ngwallet-$platform/* tmp/$bin_pkgname
 mktarball $bin_pkgname

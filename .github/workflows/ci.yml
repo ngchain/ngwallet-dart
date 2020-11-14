@@ -22,7 +22,7 @@ jobs:
           target: aarch64-unknown-linux-gnu
           gcc_package: gcc-aarch64-linux-gnu
           gcc: aarch64-linux-gnu-gcc
-          qemu: qemu-aarch64 -L /usr/aarch64-linux-gnu
+          qemu: $HOME/qemu/bin/qemu-aarch64 -L /usr/aarch64-linux-gnu
           qemu_target: aarch64-linux-user
     steps:
     - uses: actions/checkout@v2

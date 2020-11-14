@@ -20,9 +20,7 @@ jobs:
         - build: aarch64-linux
           os: ubuntu-latest
           target: aarch64-unknown-linux-gnu
-          gcc_package: gcc-aarch64-linux-gnu
-          gcc: aarch64-linux-gnu-gcc
-          qemu: $HOME/qemu/bin/qemu-aarch64 -L /usr/aarch64-linux-gnu
+          qemu: qemu-aarch64 -L /usr/aarch64-linux-gnu
           qemu_target: aarch64-linux-user
     steps:
     - uses: actions/checkout@v2
@@ -39,17 +37,8 @@ jobs:
       run: |
         set -ex
         sudo apt-get update
-        sudo apt-get install -y ${{ matrix.gcc_package }}
-        # Download and build qemu from source since the most recent release is
-        # way faster at arm emulation than the current version github actions'
-        # ubuntu image uses. Disable as much as we can to get it to build
-        # quickly.
-        curl https://download.qemu.org/qemu-5.0.0.tar.xz | tar xJf -
-        cd qemu-5.0.0
-        ./configure --target-list=${{ matrix.qemu_target }} --prefix=$HOME/qemu --disable-tools --disable-slirp --disable-fdt --disable-capstone --disable-docs
-        make -j$(nproc) install
-        upcase=$(echo ${{ matrix.target }} | awk '{ print toupper($0) }' | sed 's/-/_/g')
-      if: matrix.target != '' && matrix.os == 'ubuntu-latest'
+        sudo apt-get install -y qemu-system-arm qemu
+      if: matrix.build == 'aarch64-linux'
 
     - name: get ready
       run: ${{ matrix.qemu }} pub get

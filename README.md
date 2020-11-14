@@ -7,11 +7,11 @@ So before running ngwallet, it is required to host or find a living rpc server o
 ## Usage
 
 ```bash
-# compile
-dart2native ./bin/ngwallet.dart
+# run like javascript
+dart ./bin/ngwallet.dart --help
 
-# get help
-./bin/ngwallet help
+# or use the binary
+./ngwallet --help
 
 ```
 

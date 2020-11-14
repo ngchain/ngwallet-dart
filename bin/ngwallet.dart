@@ -1,10 +1,14 @@
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
+import 'package:fast_base58/fast_base58.dart';
+import 'package:hex/hex.dart';
+import 'package:ngwallet/defaults.dart';
 import 'package:ngwallet/keytools.dart';
 import 'package:ngwallet/rpc_client.dart';
 import 'package:ngwallet/utils.dart';
 import 'package:path/path.dart' as path;
+import 'package:secp256k1/secp256k1.dart';
 
 class JsonRpcCMD extends Command {
   JsonRpcCMD() {
@@ -42,8 +46,12 @@ class JsonRpcCMD extends Command {
   }
 
   Future<String> get privateKey async {
-    return await decryptKeyFile(
-        argResults['keyfilePath'], argResults['keyfilePassword']);
+    try {
+      return await decryptKeyFile(
+          argResults['keyfilePath'], argResults['keyfilePassword']);
+    } on FileSystemException {
+      return await decryptKeyFile('ngcore.key', argResults['keyfilePassword']);
+    }
   }
 
   NgRPCClient get client {
@@ -82,6 +90,43 @@ class CheckTxCMD extends JsonRpcCMD {
   }
 }
 
+class NewWalletCMD extends JsonRpcCMD {
+  @override
+  final name = 'new';
+
+  @override
+  final description = 'Create one new wallet file for receiving NG.';
+
+  @override
+  Future<void> run() async {
+    var pk = PrivateKey.generate();
+    switch (argResults.arguments.length) {
+      case 0:
+        await encryptToKeyFile(pk, 'ngcore.key', '');
+        var rawPK = HEX.decode(pk.toHex());
+        var newAddr = getBS58AddressFromPrivateKey(Base58Encode(rawPK));
+        print('new address is $newAddr');
+        break;
+      case 1:
+        await encryptToKeyFile(pk, 'ngcore.key', argResults.arguments[0]);
+        var rawPK = HEX.decode(pk.toHex());
+        var newAddr = getBS58AddressFromPrivateKey(Base58Encode(rawPK));
+        print('new address is $newAddr');
+        break;
+
+      case 2:
+        await encryptToKeyFile(
+            pk, argResults.arguments[0], argResults.arguments[1]);
+        var rawPK = HEX.decode(pk.toHex());
+        var newAddr = getBS58AddressFromPrivateKey(Base58Encode(rawPK));
+        print('new address is $newAddr');
+        break;
+      default:
+        throw ArgumentError;
+    }
+  }
+}
+
 class GetAddressCMD extends JsonRpcCMD {
   @override
   final name = 'address';
@@ -108,6 +153,32 @@ class GetAddressCMD extends JsonRpcCMD {
   }
 }
 
+class GetAccountCMD extends JsonRpcCMD {
+  @override
+  final name = 'account';
+
+  @override
+  final description =
+      'Show local account for sending NG, or search the account belonging to one address.';
+
+  @override
+  Future<void> run() async {
+    switch (argResults.arguments.length) {
+      case 0:
+        var account = await client
+            .getAccountByAddr(getBS58AddressFromPrivateKey(await privateKey));
+        print(account);
+        break;
+      case 1:
+        var account = await client.getAccountByAddr(argResults.arguments[0]);
+        print(account);
+        break;
+      default:
+        throw ArgumentError;
+    }
+  }
+}
+
 class GetBalanceCMD extends JsonRpcCMD {
   @override
   final name = 'balance';
@@ -120,26 +191,27 @@ class GetBalanceCMD extends JsonRpcCMD {
 
   @override
   Future<void> run() async {
+    BigInt balance;
     switch (argResults.arguments.length) {
       case 0:
         var address = getBS58AddressFromPrivateKey(await privateKey);
-        var balance = await client.getBalanceByAddr(address);
-        print(balance);
+        balance = await client.getBalanceByAddr(address);
         break;
       case 1:
         try {
           var accountNum = int.parse(argResults.arguments[0]);
-          var balance = await client.getBalanceByNum(accountNum);
-          print(balance);
+          balance = await client.getBalanceByNum(accountNum);
         } on FormatException {
           var address = argResults.arguments[0];
-          var balance = await client.getBalanceByAddr(address);
-          print(balance);
+          balance = await client.getBalanceByAddr(address);
         }
         break;
       default:
         throw ArgumentError;
     }
+
+    var strBal = (balance / oneNG).toString();
+    print('Balance: $strBal NG');
   }
 }
 
@@ -311,6 +383,8 @@ Future main(List<String> args) async {
     ..addCommand(CheckTxCMD())
     ..addCommand(GetAddressCMD())
     ..addCommand(GetBalanceCMD())
+    ..addCommand(NewWalletCMD())
+    ..addCommand(GetAccountCMD())
     ..addCommand(SendRegisterTxCMD())
     ..addCommand(SendLogoutTxCMD())
     ..addCommand(SendTransactionTxCMD())

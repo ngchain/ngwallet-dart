@@ -41,7 +41,7 @@ class NgRPCClient {
     return res;
   }
 
-  Future<List> getAccountByAddr(String addr) async {
+  Future<Map> getAccountByAddr(String addr) async {
     var res = await proxy.call('getAccountByAddress', {'address': addr});
     if (res is Exception) {
       throw res;

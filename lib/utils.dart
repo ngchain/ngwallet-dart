@@ -4,6 +4,7 @@ import 'package:secp256k1/secp256k1.dart';
 import 'package:sha3/sha3.dart';
 
 String getBS58AddressFromPrivateKey(String bs58PrivateKeys) {
+  // TODO: support list keys
   var rawPrivateKey = Base58Decode(bs58PrivateKeys);
   var hexPrivateKey = HEX.encode(rawPrivateKey);
 

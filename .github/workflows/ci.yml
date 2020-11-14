@@ -29,14 +29,14 @@ jobs:
           qemu_target: aarch64-linux-user
     steps:
     - uses: actions/checkout@v2
+    - uses: cedx/setup-dart@v2
       with:
         architecture: x64
-      if: matrix.build != 'aarch64-linux'
-    - uses: actions/checkout@v2
-      with:
-        architecture: arm64
       if: matrix.build == 'aarch64-linux'
     - uses: cedx/setup-dart@v2
+      with:
+        architecture: arm64
+      if: matrix.build != 'aarch64-linux'    
     - name: get ready
       run: pub get
     - name: run tests

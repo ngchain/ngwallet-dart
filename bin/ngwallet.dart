@@ -57,6 +57,15 @@ class JsonRpcCMD extends Command {
   NgRPCClient get client {
     return NgRPCClient(daemon);
   }
+
+  Future<int> get convener async {
+    var addr = getBS58AddressFromPrivateKey(await privateKey);
+    var acc = client.getAccountByAddr(addr);
+    if ((await acc) == null) {
+      throw ('local address $addr doesn\'t have account, please register if you wanna sending coins');
+    }
+    return (await acc)['num'];
+  }
 }
 
 class CheckTxCMD extends JsonRpcCMD {
@@ -165,9 +174,7 @@ class GetAccountCMD extends JsonRpcCMD {
   Future<void> run() async {
     switch (argResults.arguments.length) {
       case 0:
-        var account = await client
-            .getAccountByAddr(getBS58AddressFromPrivateKey(await privateKey));
-        print(account);
+        print(await convener);
         break;
       case 1:
         var account = await client.getAccountByAddr(argResults.arguments[0]);
@@ -228,19 +235,17 @@ class SendTransactionTxCMD extends JsonRpcCMD {
     argParser.addMultiOption('values', defaultsTo: []);
     argParser.addOption('fee', defaultsTo: '0.0');
     argParser.addOption('extra', defaultsTo: '');
-    argParser.addSeparator('''argument 0: <Convener>''');
   }
 
   @override
   Future<void> run() async {
-    var convener = int.parse(checkEmpty(argResults.arguments[0], 'convener'));
     var participants = argResults['participants'];
     var values = LStr2LNum(argResults['values']);
     var fee = num.parse(checkEmpty(argResults['fee'], 'fee'));
     var extra = argResults['extra'];
 
-    var unsignedTx =
-        await client.genTransaction(convener, participants, values, fee, extra);
+    var unsignedTx = await client.genTransaction(
+        await convener, participants, values, fee, extra);
     var signedTx = await client.signTx([await privateKey], unsignedTx);
     print('signed raw Tx is ' + await signedTx);
     var hash = await client.sendTx(signedTx);
@@ -322,19 +327,14 @@ class SendAssignTxCMD extends JsonRpcCMD {
   }
 
   @override
-  final usageFooter = '''argument 0: <Convener>''';
-
-  @override
   void run() async {
     if (argResults.arguments.length != 1) {
       throw ArgumentError;
     }
-
-    var convener = int.parse(checkEmpty(argResults.arguments[0], 'convener'));
     var fee = num.parse(argResults['fee']);
     var extra = argResults['extra'];
 
-    var unsignedTx = await client.genAssign(convener, fee, extra);
+    var unsignedTx = await client.genAssign(await convener, fee, extra);
     var signedTx = await client.signTx([await privateKey], unsignedTx);
     print('signed raw Tx is ' + await signedTx);
     var hash = await client.sendTx(signedTx);
@@ -355,19 +355,15 @@ class SendAppendTxCMD extends JsonRpcCMD {
   }
 
   @override
-  final usageFooter = '''argument 0: <Convener>''';
-
-  @override
   void run() async {
     if (argResults.arguments.length != 1) {
       throw ArgumentError;
     }
 
-    var convener = int.parse(checkEmpty(argResults.arguments[0], 'convener'));
     var fee = num.parse(checkEmpty(argResults['fee'], 'fee'));
     var extra = argResults['extra'];
 
-    var unsignedTx = await client.genAssign(convener, fee, extra);
+    var unsignedTx = await client.genAssign(await convener, fee, extra);
     var signedTx = await client.signTx([await privateKey], unsignedTx);
     print('signed raw Tx is ' + await signedTx);
     var hash = await client.sendTx(signedTx);

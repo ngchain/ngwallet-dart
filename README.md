@@ -59,14 +59,14 @@ or directlly download and run the [precompiled binary](https://github.com/ngchai
 ### transact
 
 ```bash
-./ngwallet transact 10010 --participants 10011 --values 1.5 # send 1.5 NG to 10011
-./ngwallet transact 10010 --participants 10011,10012 --values 1.5,2.33 # send 1.5 NG to 10011 and 2.33 to 10012
+./ngwallet transact --participants 10011 --values 1.5 # send 1.5 NG to 10011
+./ngwallet transact --participants 10011,10012 --values 1.5,2.33 # send 1.5 NG to 10011 and 2.33 to 10012
 ```
 
 ## logout
 
 ```bash
-./ngwallet logout 10010 # logout account 10010  1.5 NG to 10011
+./ngwallet logout # logout address' account
 ```
 
 ## check

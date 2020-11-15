@@ -1,3 +1,7 @@
+## 0.1.2
+
+- no need to input convener any longer, wallet will auto recognize
+
 ## 0.1.1
 
 - Shorten the commands

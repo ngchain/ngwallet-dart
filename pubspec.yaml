@@ -1,6 +1,6 @@
 name: ngwallet
 description: A sample CLI wallet to NGIN.
-version: 0.1.0
+version: 0.1.2
 homepage: https://ngin.sh
 
 environment:

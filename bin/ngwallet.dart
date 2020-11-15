@@ -300,11 +300,10 @@ class SendLogoutTxCMD extends JsonRpcCMD {
 
   @override
   void run() async {
-    var fee = checkEmpty(argResults['fee'], 'fee');
+    var fee = argResults['fee'];
     var extra = argResults['extra'];
 
-    var logoutAccountNum =
-        checkEmpty(argResults.arguments[0], 'logoutAccountNum');
+    var logoutAccountNum = await convener;
 
     var unsignedTx = await client.genLogout(logoutAccountNum, fee, extra);
     var signedTx = await client.signTx([await privateKey], unsignedTx);
